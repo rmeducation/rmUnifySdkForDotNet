@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>RM.Unify.Sdk</id>
+    <title>RM Unify SDK - Client Library for .NET</title>
+    <version>$version$</version>
+    <authors>RM Education</authors>
+    <licenseUrl>http://dev.rmunify.com/rm-unify-sdk/rm-unify-client-library-licence.aspx</licenseUrl>
+    <projectUrl>http://dev.rmunify.com/rm-unify-sdk/</projectUrl>
+    <description>
+      .NET Client Library for integrating with the RM Unify Platform (http://www.rm.com/rmunify).  Provides federated authentication via an implementation of the WS-Federation protocol.  Lightweight, easy to use and plays nicely with your existing architecture.  More info at http://dev.rmunify.com/rm-unify-sdk/.
+    </description>
+    <copyright>RM Education 2013</copyright>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+  </metadata>
+  <files>
+    <file src="RM.Unify.Sdk.Client\bin\Release\RM.Unify.Sdk.Client.dll" target="lib\net20\RM.Unify.Sdk.Client.dll" />
+	<file src="RM.Unify.Sdk.Client\LICENCE.txt" target="LICENCE.txt" />
+  </files>
+</package>

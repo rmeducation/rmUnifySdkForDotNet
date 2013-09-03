@@ -1,5 +1,5 @@
-RM Unify SDK for .NET
-=====================
+RM Unify Sample App (part of RM Unify SDK for .NET)
+===================================================
 
 Copyright (C) 2013 RM Education Ltd
 

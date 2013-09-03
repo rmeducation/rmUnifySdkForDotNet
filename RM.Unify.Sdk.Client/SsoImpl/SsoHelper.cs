@@ -1,0 +1,140 @@
+﻿//-------------------------------------------------
+// <copyright file="SsoHelper.cs" company="RM Education">                    
+//     Copyright © 2013 RM Education Ltd
+//     See LICENCE.txt file for more details
+// </copyright>
+//-------------------------------------------------
+using System;
+using RM.Unify.Sdk.Client.Platform;
+using System.Reflection;
+using System.Diagnostics;
+
+namespace RM.Unify.Sdk.Client.SsoImpl
+{
+    internal class SsoHelper
+    {
+        private RmUnifyCallbackApi _callbackApi;
+        private static string _libVersionParam;
+
+        private static string _LibVersionParam
+        {
+            get
+            {
+                if (_libVersionParam == null)
+                {
+                    var assembly = Assembly.GetExecutingAssembly();
+                    FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+                    _libVersionParam = "rmunifylib=" + PlatformHelper.UrlEncode(".NET" + fvi.FileVersion);
+                }
+                return _libVersionParam;
+            }
+        }
+
+        internal SsoHelper(RmUnifyCallbackApi callbackApi)
+        {
+            _callbackApi = callbackApi;
+        }
+
+        internal void Login(string returnUrl, bool refreshOnly)
+        {
+            if (!refreshOnly || IsRmUnifyUser())
+            {
+                InitiateSignIn(returnUrl);
+            }
+        }
+
+        internal void Logout()
+        {
+            if (IsRmUnifyUser())
+            {
+                PlatformHelper.DeleteCookie("_rmunify_user");
+                PlatformHelper.RedirectBrowser(SsoConfig.IssueUrl + "?wa=wsignout1.0&wreply=" + PlatformHelper.UrlEncode(_callbackApi.Realm) + "&" + _LibVersionParam);
+            }
+        }
+
+        internal void ProcessSso()
+        {
+            if (!ProcessSignIn())
+            {
+                if (!ProcessSignOut())
+                {
+                    string returnUrl = PlatformHelper.GetParam("returnUrl");
+                    InitiateSignIn(returnUrl);
+                }
+            }
+        }
+
+        internal static bool IsRmUnifyUser()
+        {
+            return PlatformHelper.GetCookie("_rmunify_user") == "true";
+        }
+
+        internal bool ProcessSignIn()
+        {
+            if (PlatformHelper.GetParam("wa") == "wsignin1.0")
+            {
+                string messageStr = PlatformHelper.GetParam("wresult");
+                SignInMessage message = new SignInMessage(messageStr);
+                DateTime notOnOrAfter = message.Verify(_callbackApi.Realm, _callbackApi.MaxClockSkewSeconds, _callbackApi.Cache);
+
+                RmUnifyUser user = new SsoUser(message);
+
+                if (user.Organization.Id != null)
+                {
+                    _callbackApi.CreateOrUpdateOrganization(user.Organization, RmUnifyCallbackApi.Source.SingleSignOn);
+                }
+                if (user.Id != null)
+                {
+                    _callbackApi.CreateOrUpdateUser(user, RmUnifyCallbackApi.Source.SingleSignOn);
+                }
+
+
+                PlatformHelper.AddSessionCookie("_rmunify_user", "true");
+
+                string returnUrl = PlatformHelper.GetParam("wctx");
+
+                try
+                {
+                    _callbackApi.DoLogin(user, notOnOrAfter, returnUrl);
+                }
+                catch
+                {
+                    try
+                    {
+                        PlatformHelper.DeleteCookie("_rmunify_user");
+                    }
+                    catch { }
+                    throw;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        internal bool ProcessSignOut()
+        {
+            if (PlatformHelper.GetParam("wa") == "wsignoutcleanup1.0")
+            {
+                _callbackApi.DoLogout();
+                PlatformHelper.DeleteCookie("_rmunify_user");
+                PlatformHelper.SendTickResponse();
+
+                return true;
+            }
+            return false;
+        }
+
+        internal void InitiateSignIn(string returnUrl)
+        {
+            string url = SsoConfig.IssueUrl + "?wa=wsignin1.0&wtrealm=" + PlatformHelper.UrlEncode(_callbackApi.Realm);
+            if (returnUrl != null)
+            {
+                url += "&wctx=" + PlatformHelper.UrlEncode(returnUrl);
+            }
+            url +=  "&" + _LibVersionParam;
+            PlatformHelper.RedirectBrowser(url);
+        }
+    }
+}

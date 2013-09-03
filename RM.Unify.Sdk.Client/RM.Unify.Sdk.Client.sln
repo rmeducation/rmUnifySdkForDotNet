@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RM.Unify.Sdk.Client", "RM.Unify.Sdk.Client.csproj", "{8B4F2A3E-4CF8-42D1-B0B8-40B124B49A7E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6F50098B-A99F-48F4-B34F-E46966C1BDBB}"
+	ProjectSection(SolutionItems) = preProject
+		LICENCE.txt = LICENCE.txt
+		README.txt = README.txt
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8B4F2A3E-4CF8-42D1-B0B8-40B124B49A7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B4F2A3E-4CF8-42D1-B0B8-40B124B49A7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B4F2A3E-4CF8-42D1-B0B8-40B124B49A7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B4F2A3E-4CF8-42D1-B0B8-40B124B49A7E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
