@@ -10,6 +10,7 @@ using Microsoft.Web.WebPages.OAuth;
 using WebMatrix.WebData;
 using RM.Unify.Sdk.SampleAppMvc.Filters;
 using RM.Unify.Sdk.SampleAppMvc.Models;
+using RM.Unify.Sdk.Client;
 
 namespace RM.Unify.Sdk.SampleAppMvc.Controllers
 {
@@ -53,6 +54,9 @@ namespace RM.Unify.Sdk.SampleAppMvc.Controllers
         public ActionResult LogOff()
         {
             WebSecurity.Logout();
+
+            RM.Unify.Sdk.Client.RmUnifyClientApi client = new RM.Unify.Sdk.Client.RmUnifyClientApi(new RmUnify.CallbackApiImplementation());
+            client.Logout();
 
             return RedirectToAction("Index", "Home");
         }
