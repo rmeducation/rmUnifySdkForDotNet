@@ -54,13 +54,29 @@ namespace RM.Unify.Sdk.Client.SsoImpl
 
         internal void ProcessSso()
         {
-            if (!ProcessSignIn())
+            try
             {
-                if (!ProcessSignOut())
+                if (!ProcessSignIn())
                 {
-                    string returnUrl = PlatformHelper.GetParam("returnUrl");
-                    InitiateSignIn(returnUrl);
+                    if (!ProcessSignOut())
+                    {
+                        string returnUrl = PlatformHelper.GetParam("returnUrl");
+                        InitiateSignIn(returnUrl);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                if (_callbackApi.RmUnifyErrorPages)
+                {
+                    var errorUrl = SsoConfig.GetErrorUrl(_callbackApi.Realm, ex, _LibVersionParam);
+                    if (!string.IsNullOrEmpty(errorUrl))
+                    {
+                        PlatformHelper.RedirectBrowser(errorUrl);
+                        return;
+                    }
+                }
+                throw;
             }
         }
 
@@ -77,14 +93,46 @@ namespace RM.Unify.Sdk.Client.SsoImpl
                 SignInMessage message = new SignInMessage(messageStr);
                 DateTime notOnOrAfter = message.Verify(_callbackApi.Realm, _callbackApi.MaxClockSkewSeconds, _callbackApi.Cache);
 
-                RmUnifyUser user = new SsoUser(message);
+                SsoUser user = new SsoUser(message);
+                PlatformHelper.AddSessionCookie("_rmunify_user", "true");
 
-                if (user.Organization.Id != null)
+                if (!string.IsNullOrEmpty(user.Organization.Id))
                 {
-                    _callbackApi.CreateOrUpdateOrganization(user.Organization, RmUnifyCallbackApi.Source.SingleSignOn);
+                    if (!string.IsNullOrEmpty(user.Organization.AppEstablishmentKey))
+                    {
+                        if (user.Organization.IsSsoConnector)
+                        {
+                            if (!_callbackApi.IsOrganizationLicensed(user.Organization.AppEstablishmentKey, user.Organization, RmUnifyCallbackApi.Source.SingleSignOn))
+                            {
+                                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_NOLICENCE, "No licence found for school with establishment key: " + user.Organization.AppEstablishmentKey);
+                            }
+                        }
+                        _callbackApi.UpdateLinkedOrganization(user.Organization.AppEstablishmentKey, user.Organization, RmUnifyCallbackApi.Source.SingleSignOn);
+                    }
+                    else
+                    {
+                        if (user.Organization.IsSsoConnector)
+                        {
+                            throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_INVALIDAPPESTABLISHMENTKEY, "Invalid AppEstablishmentKey in SSO Connector");
+                        }
+                        _callbackApi.CreateOrUpdateOrganization(user.Organization, RmUnifyCallbackApi.Source.SingleSignOn);
+                    }
                 }
-                if (user.Id != null)
+
+                if (!string.IsNullOrEmpty(user.AppUserId))
                 {
+                    if (string.IsNullOrEmpty(user.Organization.AppEstablishmentKey))
+                    {
+                        throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_INVALIDAPPESTABLISHMENTKEY, "Invalid AppEstablishmentKey for linked user");
+                    }
+                    _callbackApi.UpdateLinkedUser(user.AppUserId, user.Organization.AppEstablishmentKey, user, RmUnifyCallbackApi.Source.SingleSignOn);
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(user.Id))
+                    {
+                        throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_MISSINGATTRIBUTES, "No user ID (IdentityGuid or PersistentId) provided by RM Unify");
+                    }
                     _callbackApi.CreateOrUpdateUser(user, RmUnifyCallbackApi.Source.SingleSignOn);
                 }
 
@@ -92,10 +140,16 @@ namespace RM.Unify.Sdk.Client.SsoImpl
                 PlatformHelper.AddSessionCookie("_rmunify_user", "true");
 
                 string returnUrl = PlatformHelper.GetParam("wctx");
-
                 try
                 {
-                    _callbackApi.DoLogin(user, notOnOrAfter, returnUrl);
+                    if (!string.IsNullOrEmpty(user.AppUserId))
+                    {
+                        _callbackApi.DoLoginForLinkedUser(user.AppUserId, user.Organization.AppEstablishmentKey, user, notOnOrAfter, returnUrl);
+                    }
+                    else
+                    {
+                        _callbackApi.DoLogin(user, notOnOrAfter, returnUrl);
+                    }
                 }
                 catch
                 {

@@ -42,6 +42,7 @@
     <Compile Include="Platform\PlatformHelper.cs" />
     <Compile Include="RmUnifyCallbackApi.cs" />
     <Compile Include="IRmUnifyCache.cs" />
+    <Compile Include="RmUnifyException.cs" />
     <Compile Include="SsoImpl\SsoConfig.cs" />
     <Compile Include="RmUnifyOrganization.cs" />
     <Compile Include="RmUnifyUser.cs" />

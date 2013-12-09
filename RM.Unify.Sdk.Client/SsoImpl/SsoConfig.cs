@@ -15,6 +15,8 @@ namespace RM.Unify.Sdk.Client.SsoImpl
         private static string _issuer = "http://sts.platform.rmunify.com/sts";
         private static string _issueUrl = "https://sts.platform.rmunify.com/issue/wsfed/";
         private static string _metadataUrl = "https://sts.platform.rmunify.com/FederationMetadata/2007-06/FederationMetadata.xml";
+        private static string _errorUrl = "https://sts.platform.rmunify.com/error/appaccesserror?wtrealm={0}&code={1}&info={2}&{3}";
+        private static string _errorUrlWithMessage = "https://sts.platform.rmunify.com/error/appaccesserror?wtrealm={0}&code={1}&message={2}&{3}";
 
         private static string _ssoCertificateStr;
         private static X509Certificate2 _ssoCertificate;
@@ -64,6 +66,17 @@ namespace RM.Unify.Sdk.Client.SsoImpl
         }
 
         /// <summary>
+        /// The error page in RM Unify to use to display an error
+        /// </summary>
+        internal static string GetErrorUrl(string realm, Exception exception, string libVersionParam)
+        {
+            RmUnifySsoException ssoException = exception as RmUnifySsoException;
+            int code = (ssoException == null) ? 998 : ssoException.ErrorCode;
+            string errorUrl = (ssoException == null) ? _errorUrlWithMessage : (ssoException.ShowCustomMessage ? _errorUrlWithMessage : _errorUrl);
+            return string.Format(errorUrl, realm, code, exception.Message, libVersionParam);
+        }
+
+        /// <summary>
         /// Update the SSO certificate from metadata
         /// </summary>
         /// <returns>True if updated, false otherwise</returns>
@@ -84,7 +97,7 @@ namespace RM.Unify.Sdk.Client.SsoImpl
                     }
                     catch
                     {
-                        throw new RmUnifySsoException("Login failed: unable to download RM Unify metadata from " + _metadataUrl);
+                        throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_METADATADOWNLOADFAILED, "Login failed: unable to download RM Unify metadata from " + _metadataUrl);
                     }
 
                     var nSpace = new XmlNamespaceManager(doc.NameTable);
@@ -94,7 +107,7 @@ namespace RM.Unify.Sdk.Client.SsoImpl
                     XmlElement certElement = (XmlElement)doc.SelectSingleNode("//md:KeyDescriptor[@use='signing']/ds:KeyInfo/ds:X509Data/ds:X509Certificate", nSpace);
                     if (certElement == null)
                     {
-                        throw new RmUnifySsoException("Login failed: can't find certificate in RM Unify metadata from " + _metadataUrl);
+                        throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_METADATADOWNLOADFAILED, "Login failed: can't find certificate in RM Unify metadata from " + _metadataUrl);
                     }
 
                     string newCertStr = certElement.InnerText;

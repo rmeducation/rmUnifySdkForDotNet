@@ -5,11 +5,15 @@
 // </copyright>
 //-------------------------------------------------
 using System;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace RM.Unify.Sdk.Client.SsoImpl
 {
     internal class SsoUser : RmUnifyUser
     {
+        private string _id = "";
+
         /// <summary>
         /// Construct an RmUnifyUser from a SignInMessage
         /// </summary>
@@ -17,71 +21,174 @@ namespace RM.Unify.Sdk.Client.SsoImpl
         internal SsoUser(SignInMessage m)
         {
             RawSsoAttributes = m.Attributes;
-            byte[] id;
+            Organization = new SsoOrganization(this);
+        }
 
-            PersonId = m.Attributes.GetOrDefault("http://schemas.rm.com/identity/claims/identityguid");
-            if (PersonId != null)
+        public override string Id
+        {
+            get
             {
-                id = new Guid(PersonId).ToByteArray();
+                if (_id != "")
+                {
+                    return _id;
+                }
+
+                string idstr;
+                byte[] id = null;
+                RawSsoAttributes.TryGetValue("http://schemas.rm.com/identity/claims/identityguid", out idstr);
+
+                if (idstr != null)
+                {
+                    id = new Guid(idstr).ToByteArray();
+                }
+                else
+                {
+                    RawSsoAttributes.TryGetValue("http://schemas.rm.com/identity/claims/persistentid", out idstr);
+                    if (idstr != null)
+                    {
+                        id = Convert.FromBase64String(idstr);
+                    }
+                }
+
+                if (id != null)
+                {
+                    string orgstr = this.Organization.Id;
+                    if (orgstr != null)
+                    {
+                        byte[] orgId = new Guid(Organization.Id).ToByteArray();
+                        byte[] combinedId = new byte[orgId.Length + id.Length];
+                        Array.Copy(orgId, combinedId, orgId.Length);
+                        Array.Copy(id, 0, combinedId, orgId.Length, id.Length);
+                        _id = Convert.ToBase64String(combinedId);
+                    }
+                }
+
+                return _id == "" ? null : _id;
             }
-            else
+        }
+
+        public override string PersonId
+        {
+            get
             {
-                PersonId = m.Attributes.GetOrDefault("http://schemas.rm.com/identity/claims/persistentid");
-                id = Convert.FromBase64String(PersonId);
+                string personId;
+
+                RawSsoAttributes.TryGetValue("http://schemas.rm.com/identity/claims/identityguid", out personId);
+                if (personId == null)
+                {
+                    RawSsoAttributes.TryGetValue("http://schemas.rm.com/identity/claims/persistentid", out personId);
+                }
+
+                return personId;
             }
+        }
 
-            DisplayName = m.Attributes.GetOrDefault("http://schemas.rm.com/identity/claims/displayname");
-            FirstName = m.Attributes.GetOrDefault("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname");
-            LastName = m.Attributes.GetOrDefault("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname");
-            UnifyUserName = m.Attributes.GetOrDefault("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
-
-            string role = m.Attributes.GetOrDefault("http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
-            switch (role)
+        public override string DisplayName
+        {
+            get
             {
-                case "Student":
-                    UserRole = Role.Student;
-                    break;
-                case "TeachingStaff":
-                    UserRole = Role.TeachingStaff;
-                    break;
-                case "NonTeachingStaff":
-                    UserRole = Role.NonTeachingStaff;
-                    break;
-                case "Parent":
-                    UserRole = Role.Parent;
-                    break;
-                case "Governor":
-                    UserRole = Role.Governor;
-                    break;
-                case "Other":
-                    UserRole = Role.Other;
-                    break;
-                default:
-                    UserRole = Role.Unknown;
-                    break;
+                string val;
+                RawSsoAttributes.TryGetValue("http://schemas.rm.com/identity/claims/displayname", out val);
+                return val;
             }
+        }
 
-            string yearOfEntryStr = m.Attributes.GetOrDefault("http://schemas.rm.com/identity/claims/yearofentry");
-            if (yearOfEntryStr != null)
+        public override string FirstName
+        {
+            get
             {
-                YearOfEntry = int.Parse(yearOfEntryStr);
+                string val;
+                RawSsoAttributes.TryGetValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname", out val);
+                return val;
             }
+        }
 
-            string isUnifyAdminStr = m.Attributes.GetOrDefault("http://schemas.rm.com/identity/claims/isunifyadmin");
-            IsUnifyAdmin = (isUnifyAdminStr != null && isUnifyAdminStr.ToLower() == "true");
-
-            UnifyEmailAddress = m.Attributes.GetOrDefault("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress");
-
-            Organization = new SsoOrganization(m);
-
-            if (id != null && Organization.Id != null)
+        public override string LastName
+        {
+            get
             {
-                // Create short base64 encoding to decrease risk of overflowing existing DB column
-                byte[] orgId = new Guid(Organization.Id).ToByteArray();
-                byte[] combinedId = new byte[orgId.Length + id.Length];
-                Array.Copy(orgId, combinedId, orgId.Length);
-                Array.Copy(id, 0, combinedId, orgId.Length, id.Length);
-                Id = Convert.ToBase64String(combinedId);
+                string val;
+                RawSsoAttributes.TryGetValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname", out val);
+                return val;
+            }
+        }
+
+        public override string UnifyUserName
+        {
+            get
+            {
+                string val;
+                RawSsoAttributes.TryGetValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name", out val);
+                return val;
+            }
+        }
+
+        public override Role UserRole
+        {
+            get
+            {
+                string roleStr;
+                RawSsoAttributes.TryGetValue("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", out roleStr);
+                switch (roleStr)
+                {
+                    case "Student":
+                        return Role.Student;
+                    case "TeachingStaff":
+                        return Role.TeachingStaff;
+                    case "NonTeachingStaff":
+                        return Role.NonTeachingStaff;
+                    case "Parent":
+                        return Role.Parent;
+                    case "Governor":
+                        return Role.Governor;
+                    case "Other":
+                        return Role.Other;
+                }
+                return Role.Unknown;
+            }
+        }
+
+        public override int? YearOfEntry
+        {
+            get
+            {
+                string yearOfEntryStr;
+                RawSsoAttributes.TryGetValue("http://schemas.rm.com/identity/claims/yearofentry", out yearOfEntryStr);
+                if (yearOfEntryStr != null)
+                {
+                    return int.Parse(yearOfEntryStr);
+                }
+                return null;
+            }
+        }
+
+        public override bool IsUnifyAdmin
+        {
+            get
+            {
+                string isUnifyAdminStr;
+                RawSsoAttributes.TryGetValue("http://schemas.rm.com/identity/claims/isunifyadmin", out isUnifyAdminStr);
+                return (isUnifyAdminStr != null && isUnifyAdminStr.ToLower() == "true");
+            }
+        }
+
+        public override string UnifyEmailAddress
+        {
+            get
+            {
+                string val;
+                RawSsoAttributes.TryGetValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", out val);
+                return val;
+            }
+        }
+
+        public override string AppUserId
+        {
+            get
+            {
+                string val;
+                RawSsoAttributes.TryGetValue("http://schemas.rm.com/identity/claims/appuserid", out val);
+                return string.IsNullOrEmpty(val) ? null : val;
             }
         }
     }

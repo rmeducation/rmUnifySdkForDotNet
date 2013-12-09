@@ -48,7 +48,7 @@ namespace RM.Unify.Sdk.Client.SsoImpl
             }
             catch (Exception)
             {
-                throw new RmUnifySsoException("Login failed: malformed message (XML can't be parsed)");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_VERIFICATIONFAILED, "Login failed: malformed message (XML can't be parsed)");
             }
 
             _samlToken = (XmlElement)_message.DocumentElement.SelectSingleNode(
@@ -56,7 +56,7 @@ namespace RM.Unify.Sdk.Client.SsoImpl
                     _nSpace);
             if (_samlToken == null)
             {
-                throw new RmUnifySsoException("Login failed: malformed message (SAML 1.1 token not found)");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_VERIFICATIONFAILED, "Login failed: malformed message (SAML 1.1 token not found)");
             }
         }
 
@@ -125,12 +125,12 @@ namespace RM.Unify.Sdk.Client.SsoImpl
 
             if (audienceElement == null)
             {
-                throw new RmUnifySsoException("Login failed: malformed token (audience restriction condition not found)");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_VERIFICATIONFAILED, "Login failed: malformed token (audience restriction condition not found)");
             }
 
             if (audienceElement.InnerText != realm)
             {
-                throw new RmUnifySsoException("Login failed: malformed token (audience restriction condition has unexpected value)");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_VERIFICATIONFAILED, "Login failed: malformed token (audience restriction condition has unexpected value)");
             }
         }
 
@@ -144,12 +144,12 @@ namespace RM.Unify.Sdk.Client.SsoImpl
 
             if (issuerAttr == null)
             {
-                throw new RmUnifySsoException("Login failed: malformed token (issuer attribute not found on SAML assertion)");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_VERIFICATIONFAILED, "Login failed: malformed token (issuer attribute not found on SAML assertion)");
             }
 
             if (issuerAttr.Value != SsoConfig.Issuer)
             {
-                throw new RmUnifySsoException("Login failed: malformed token (issuer has unexpected value)");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_VERIFICATIONFAILED, "Login failed: malformed token (issuer has unexpected value)");
             }
         }
 
@@ -173,7 +173,7 @@ namespace RM.Unify.Sdk.Client.SsoImpl
                 }
                 else
                 {
-                    throw new RmUnifySsoException("Login failed: malformed token (signature could not be verified)");
+                    throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_VERIFICATIONFAILED, "Login failed: malformed token (signature could not be verified)");
                 }
             }
         }
@@ -190,14 +190,14 @@ namespace RM.Unify.Sdk.Client.SsoImpl
             XmlElement conditions = (XmlElement)_samlToken.SelectSingleNode("//saml:Conditions", _nSpace);
             if (conditions == null)
             {
-                throw new RmUnifySsoException("Login failed: malformed token (conditions not found)");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_VERIFICATIONFAILED, "Login failed: malformed token (conditions not found)");
             }
 
             // Check NotBefore condition
             XmlAttribute notBeforeAttr = conditions.Attributes["NotBefore"];
             if (notBeforeAttr == null)
             {
-                throw new RmUnifySsoException("Login failed: not before date missing");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_VERIFICATIONFAILED, "Login failed: not before date missing");
             }
 
             DateTime notBefore;
@@ -207,24 +207,24 @@ namespace RM.Unify.Sdk.Client.SsoImpl
             }
             catch (Exception)
             {
-                throw new RmUnifySsoException("Login failed: malformed token (can't parse not before date)");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_VERIFICATIONFAILED, "Login failed: malformed token (can't parse not before date)");
             }
             if (notBefore.AddSeconds(-maxClockSkewSeconds) > now)
             {
-                throw new RmUnifySsoException("Login failed: not before date invalid");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_FUTUREOREXPIREDTOKEN, "Login failed: not before date in future");
             }
 
             // Because we don't necessarily have a replay token cache that works across servers, we'll also reject any token more than 60 seconds old
             if (notBefore.AddSeconds(maxClockSkewSeconds + MaxTokenAgeSeconds) < now)
             {
-                throw new RmUnifySsoException("Login failed: token is stale");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_FUTUREOREXPIREDTOKEN, "Login failed: token is stale");
             }
 
             // Check NotBefore condition
             XmlAttribute notOnOrAfterAttr = conditions.Attributes["NotOnOrAfter"];
             if (notOnOrAfterAttr == null)
             {
-                throw new RmUnifySsoException("Login failed: not on or after date missing");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_VERIFICATIONFAILED, "Login failed: not on or after date missing");
             }
 
             DateTime notOnOrAfter;
@@ -234,11 +234,11 @@ namespace RM.Unify.Sdk.Client.SsoImpl
             }
             catch (Exception)
             {
-                throw new RmUnifySsoException("Login failed: malformed token (can't parse not on or after date)");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_VERIFICATIONFAILED, "Login failed: malformed token (can't parse not on or after date)");
             }
             if (notOnOrAfter.AddSeconds(-maxClockSkewSeconds) <= now)
             {
-                throw new RmUnifySsoException("Login failed: not on or after date invalid");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_FUTUREOREXPIREDTOKEN, "Login failed: not on or after date invalid");
             }
 
             return notOnOrAfter;
@@ -254,13 +254,13 @@ namespace RM.Unify.Sdk.Client.SsoImpl
             XmlAttribute assertionIdAttr = _samlToken.Attributes["AssertionID"];
             if (assertionIdAttr == null)
             {
-                throw new RmUnifySsoException("Login failed: assertion ID not found");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_VERIFICATIONFAILED, "Login failed: assertion ID not found");
             }
 
             string assertionId = assertionIdAttr.Value;
             if (tokenCache.Get(assertionIdAttr.Value) != null)
             {
-                throw new RmUnifySsoException("Login failed: token replay detected");
+                throw new RmUnifySsoException(RmUnifySsoException.ERRORCODES_TOKENREPLAY, "Login failed: token replay detected");
             }
             tokenCache.Add(assertionId, "", DateTime.Now.AddSeconds(maxClockSkewSeconds + MaxTokenAgeSeconds));
         }

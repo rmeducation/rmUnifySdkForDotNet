@@ -62,6 +62,13 @@ namespace RM.Unify.Sdk.Client
         }
 
         /// <summary>
+        /// Whether to show the RM Unify error pages if there is an error during single sign on.
+        /// If true, the browser will be redirected to an error page in RM Unify; if false, the error will be thrown
+        /// to your application to handle.
+        /// </summary>
+        public virtual bool RmUnifyErrorPages { get { return true; } }
+
+        /// <summary>
         /// Create a new organization or update an existing one.
         /// This method will never be called if the organization.Id is null (for example, if the attribute
         /// has not been requested from RM Unify).
@@ -101,10 +108,82 @@ namespace RM.Unify.Sdk.Client
         /// Log the current user out of your app.
         /// This method is called when single logout is initiated from RM Unify.  If should delete any session cookies
         /// associated with your app.  The method should *not* error if there is no session.
-        /// You may also wish any open app tabs to redirect to a logged out page.  This can be
-        /// achieved by regularly checking for the existence of a session cookie using JavaScript, and disabling the app if
-        /// none is found.
+        /// You may also wish any open app tabs to redirect to a logged out page.  This can be achieved by regularly checking
+        /// for the existence of a session cookie using JavaScript, and disabling the app if none is found.
+        /// As well as implementing this method, you will also need to call Logout() on the RmUnifyClientApi if someone
+        /// clicks the logout button in your app (after deleting your session cookie).
         /// </summary>
         public abstract void DoLogout();
+
+        /// <summary>
+        /// Check that a pre-existing organization that has been linked to RM Unify is licenced in your app.
+        /// Only necessary if your app supports SSO Connectors (http://dev.rmunify.com/reference/supporting-sso-connector-licensing.aspx).
+        /// In this case, the organization has purchased your app outside RM Unify and wishes to connect RM Unify to this
+        /// licence. They get an "app establishment key" from you and enter it into RM Unify. This key is passed in to this
+        /// method for you to verify the licence.
+        /// Called before UpdateLinkedOrganization() if the organization has an SSO Connector to your app.
+        /// </summary>
+        /// <param name="appEstablishmentKey">App establishment key (as provided by you to the organization)</param>
+        /// <param name="organization">Organization profile</param>
+        /// <param name="source">Source of update (sign on or provisioning)</param>
+        /// <returns>True if organization licensed, false otherwise</returns>
+        public virtual bool IsOrganizationLicensed(string appEstablishmentKey, RmUnifyOrganization organization, Source source)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Update properties of a pre-existing organization that has been linked to RM Unify.
+        /// Only necessary if your app supports SSO Connectors (http://dev.rmunify.com/reference/supporting-sso-connector-licensing.aspx)
+        /// or the RM Unify user account matching process (http://dev.rmunify.com/reference/supporting-user-account-matching/the-rm-unify-process.aspx).
+        /// In this case, the organization has obtained your app outside RM Unify and wishes to connect RM Unify to their
+        /// existing establishment in your app. They get an "app establishment key" from you and enter it into RM Unify.
+        /// This key is passed in to this method for you to identify the establishment and update it.
+        /// Called instead of CreateOrUpdateOrganization() if the organization has an SSO Connector to your app
+        /// or has linked the organization as part of the RM Unify user account matching process.
+        /// </summary>
+        /// <param name="appEstablishmentKey">App establishment key (as provided by you to the organization)</param>
+        /// <param name="organization">Organization profile</param>
+        /// <param name="source">Source of update (sign on or provisioning)</param>
+        public virtual void UpdateLinkedOrganization(string appEstablishmentKey, RmUnifyOrganization organization, Source source)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Update properties of a pre-existing user that has been linked to RM Unify.
+        /// Only necessary if your app supports the RM Unify user account matching process
+        /// (http://dev.rmunify.com/reference/supporting-user-account-matching/the-rm-unify-process.aspx).
+        /// In this case, the organization has provisioned users into your app outside RM Unify and wishes to connect RM Unify
+        /// to their existing users. Their "app establishment key" and the existing user id in your app (typically login name)
+        /// is passed in to this method so that you can verify that the user is in the establishment and update them.
+        /// Called instead of CreateOrUpdateUser() if the current user has been linked to a user in your app as part of the
+        /// RM Unify user account matching process.
+        /// </summary>
+        /// <param name="appUserId">User ID in your app (typically login name)</param>
+        /// <param name="appEstablishmentKey">App establishment key (as provided by you to the organization)</param>
+        /// <param name="user">User profile</param>
+        /// <param name="source">Source of update (sign on or provisioning)</param>
+        public virtual void UpdateLinkedUser(string appUserId, string appEstablishmentKey, RmUnifyUser user, Source source)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Log in as a pre-existing user who has been linked to an RM Unify user.
+        /// This method is called when single sign on from RM Unify successfully completes.  CreateOrUpdateOrganization()
+        /// and CreateOrUpdateUser() will always be called first (in that order) provided the appropriate Ids are available.
+        /// Your app should set any session cookies required to log the user in.
+        /// Your app should then redirect the user to returnUrl (if set) or to the default URL for this user in your app.
+        /// </summary>
+        /// <param name="appUserId">User ID in your app (typically login name)</param>
+        /// <param name="appEstablishmentKey">App establishment key (as provided by you to the organization)</param>
+        /// <param name="user">User profile</param>
+        /// <param name="maxSessionEnd">Maxiumum time after which reauthentication should be prompted</param>
+        /// <param name="returnUrl">Return URL specified in login request (null if none)</param>
+        public virtual void DoLoginForLinkedUser(string appUserId, string appEstablishmentKey, RmUnifyUser user, DateTime maxSessionEnd, string returnUrl)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
