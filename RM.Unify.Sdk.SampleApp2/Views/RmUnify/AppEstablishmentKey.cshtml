@@ -1,0 +1,16 @@
+﻿@model RM.Unify.Sdk.SampleApp2.ViewModels.RmUnifyAppEstablishmentKeyViewModel
+<!-- RMUNIFY -->
+<h2>
+  Link to RM Unify
+</h2>
+@using (Html.BeginForm(null, null, FormMethod.Post, new { Class = "form-horizontal" }))
+{
+  <div class="form-group">
+    @Html.LabelFor(model => model.AppEstablishmentKey, new { Class = "col-md-2" })
+    <div class="col-md-4">@Html.TextBoxFor(model => model.AppEstablishmentKey, new { @readonly = "readonly", Class = "form-control", style = "cursor: text" })</div>
+  </div>
+  <div class="buttons">
+    <button name="submit" value="save" class="btn btn-primary">Download user CSV</button>
+  </div>
+}
+<!-- END RMUNIFY -->

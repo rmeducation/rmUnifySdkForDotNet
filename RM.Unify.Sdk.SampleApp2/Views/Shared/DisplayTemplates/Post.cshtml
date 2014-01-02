@@ -1,0 +1,12 @@
+﻿@model RM.Unify.Sdk.SampleApp2.Models.Post
+<div class="row">
+  <div class="col-md-12">
+    <div class="post">
+      <h2>
+        @Html.DisplayFor(model => model.Title)
+      </h2>
+      @Html.DisplayFor(model => model.Body)
+      <div class="attribution">@Html.DisplayFor(model => model.Account.DisplayName) (@Html.DisplayFor(model => model.Created))</div>
+    </div>
+  </div>
+</div>

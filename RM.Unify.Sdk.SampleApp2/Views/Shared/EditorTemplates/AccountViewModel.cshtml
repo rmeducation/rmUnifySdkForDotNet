@@ -1,0 +1,74 @@
+﻿@model RM.Unify.Sdk.SampleApp2.ViewModels.AccountViewModel
+@using RM.Unify.Sdk.SampleApp2.Helpers
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { Class = "form-horizontal" }))
+{
+  @Html.ValidationSummary(true, "Please correct the issues below and click \"Save\" again", new { Class = "alert alert-danger" })
+
+  <div class="form-group">
+    @Html.LabelFor(model => model.LoginName, new { Class = "col-md-2" })
+      @if (Model.CanEditLoginName)
+      {
+    <div class="col-md-4">@Html.TextBoxFor(model => model.LoginName, new { Class = "form-control" })</div>
+    <div class="col-md-6 val">@Html.ValidationMessageFor(model => model.LoginName)</div>
+      }
+      else
+      {
+    <div class="col-md-4">@Html.TextBoxFor(model => model.LoginName, new { disabled = "disabled", Class = "form-control" })@Html.HiddenFor(model => model.LoginName)</div>
+      }
+  </div>
+
+      if (Model.CanEditPassword)
+      {
+  <div class="form-group">
+    @Html.LabelFor(model => model.Password, new { Class = "col-md-2" })
+    <div class="col-md-4">@Html.TextBoxFor(model => model.Password, new { Class = "form-control" })</div>
+    <div class="col-md-6 val">@Html.ValidationMessageFor(model => model.Password)</div>
+  </div>
+      }
+      else
+      {
+  @Html.HiddenFor(model => model.Password)
+      }
+
+  <div class="form-group">
+    @Html.LabelFor(model => model.DisplayName, new { Class = "col-md-2" })
+      @if (Model.CanEditDisplayName)
+      {
+    <div class="col-md-4">@Html.TextBoxFor(model => model.DisplayName, new { Class = "form-control" })</div>
+    <div class="col-md-6 val">@Html.ValidationMessageFor(model => model.DisplayName)</div>
+      }
+      else
+      {
+    <div class="col-md-4">@Html.TextBoxFor(model => model.DisplayName, new { disabled = "disabled", Class = "form-control" })@Html.HiddenFor(model => model.DisplayName)</div>
+      }
+  </div>
+
+  <div class="form-group">
+    @Html.LabelFor(model => model.RoleEnum, new { Class = "col-md-2" })
+      @if (Model.CanEditRole)
+      {
+    <div class="col-md-4">@Html.DropDownListFor(model => model.RoleEnum, Model.RoleEnum.ToSelectList(), new { Class = "form-control" })</div>
+    <div class="col-md-6 val">@Html.ValidationMessageFor(model => model.RoleEnum)</div>
+      }
+      else
+      {
+    <div class="col-md-4">@Html.DropDownListFor(model => model.RoleEnum, Model.RoleEnum.ToSelectList(), new { disabled = "disabled", Class = "form-control" })@Html.HiddenFor(model => model.RoleEnum)</div>
+      }
+  </div>
+
+  <div class="buttons">
+    @{
+      if (Model.CanEditAnything)
+      {
+      <button name="submit" value="save" class="btn btn-primary">
+        Save</button>
+      @Html.ActionLink("Cancel", "Index", ViewBag.CancelController as string, null, new { Class = "btn btn-default" })
+      }
+      else
+      {
+      @Html.ActionLink("Back", "Index", ViewBag.CancelController as string, null, new { Class = "btn btn-default" })
+      }
+    }
+  </div>
+}

@@ -1,0 +1,13 @@
+﻿@model IEnumerable<RM.Unify.Sdk.SampleApp2.Models.Post>
+<h1>
+  @ViewBag.SchoolName blog
+</h1>
+<div class="row">
+  <div class="col-md-2">
+    @Html.ActionLink("New Blog Post", "Create")
+  </div>
+</div>
+@foreach (var item in Model)
+{
+  @Html.DisplayFor(m => item);
+}

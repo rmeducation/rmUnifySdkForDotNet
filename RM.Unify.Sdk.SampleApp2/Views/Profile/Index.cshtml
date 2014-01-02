@@ -1,0 +1,11 @@
+﻿@model RM.Unify.Sdk.SampleApp2.ViewModels.AccountViewModel
+<h2>
+  About Me
+</h2>
+<!-- RMUNIFY -->
+@if (RM.Unify.Sdk.SampleApp2.Models.School.Current.IsRmUnifySchool)
+{
+  <div class="alert alert-warning">Accounts in this school are synchronised with RM Unify and cannot be changed here.</div>
+}
+<!-- END RMUNIFY -->
+@Html.EditorForModel()

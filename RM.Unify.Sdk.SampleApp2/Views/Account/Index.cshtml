@@ -1,0 +1,73 @@
+﻿@model IEnumerable<RM.Unify.Sdk.SampleApp2.ViewModels.AccountViewModel>
+<h2>
+  Users
+</h2>
+<!-- RMUNIFY -->
+@if (RM.Unify.Sdk.SampleApp2.Models.School.Current.IsRmUnifySchool)
+{
+  <div class="alert alert-warning">Accounts in this school are synchronised with RM Unify.  Accounts will be hidden from this list if they are not used for 3 months, and will be permanently deleted a year later.</div>
+}
+else
+{
+<!-- END RMUNIFY -->
+<div class="row">
+  <div class="col-md-2">
+    @Html.ActionLink("New User", "Create")
+  </div>
+</div>
+<!-- RMUNIFY -->
+}
+<!-- END RMUNIFY -->
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>
+        @Html.DisplayNameFor(model => model.DisplayName)
+      </th>
+      <th>
+        @Html.DisplayNameFor(model => model.LoginName)
+      </th>
+      <th>
+        @Html.DisplayNameFor(model => model.RoleEnum)
+      </th>
+      <th>
+        @Html.DisplayNameFor(model => model.LastLogin)
+      </th>
+      <th>
+      </th>
+    </tr>
+  </thead>
+  @foreach (var item in Model)
+  {
+    <tr>
+      <td>
+        @Html.DisplayFor(modelItem => item.DisplayName)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.LoginName)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.RoleEnum)
+      </td>
+      <td>
+        @Html.DisplayFor(modelItem => item.LastLogin)
+      </td>
+      <td>
+        <!-- RMUNIFY -->
+        @if (!RM.Unify.Sdk.SampleApp2.Models.School.Current.IsRmUnifySchool)
+        {
+        <!-- END RMUNIFY -->
+          @Html.ActionLink("Edit", "Edit", new { id = item.Id })
+          if (item.Id != RM.Unify.Sdk.SampleApp2.Models.Account.Current.Id)
+          {
+            <span>|
+            @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+            </span>
+          }
+        <!- RMUNIFY -->
+        }
+        <!-- END RMUNIFY -->
+      </td>
+    </tr>
+  }
+</table>

@@ -1,0 +1,37 @@
+﻿.maincontent
+{
+  padding-top: 70px;
+}
+.narrowcontent
+{
+  max-width: 330px;
+  margin: 0 auto;
+}
+div.postbody textarea.form-control
+{
+  height: 340px;
+}
+.form-horizontal .form-group label,
+.form-horizontal .form-group input[type=checkbox],
+.form-horizontal .form-group div.val
+{
+  margin-top: 6px;
+}
+div.val
+{
+  color: rgb(185, 74, 72);
+}
+div.buttons
+{
+    margin-top:20px;
+}
+div.alert-warning a
+{
+    color: rgb(192, 152, 83);
+    text-decoration: underline;
+}
+div.attribution
+{
+    margin-top: 10px;
+    text-align: right;
+}

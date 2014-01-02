@@ -1,0 +1,16 @@
+﻿@model RM.Unify.Sdk.SampleApp2.Models.School
+<h2>
+  Delete School
+</h2>
+<div class="row">
+  <div class="col-md-12">
+    Are you sure you want to delete @Html.DisplayFor(model => model.Name)?
+  </div>
+</div>
+@using (Html.BeginForm())
+{
+  <div class="buttons">
+    <button class="btn btn-primary">Delete</button>
+    @Html.ActionLink("Cancel", "Index", null, new { Class="btn btn-default" })
+  </div>
+}

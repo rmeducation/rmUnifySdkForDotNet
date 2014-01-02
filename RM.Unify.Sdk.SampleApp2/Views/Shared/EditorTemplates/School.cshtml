@@ -1,0 +1,32 @@
+﻿@model RM.Unify.Sdk.SampleApp2.Models.School
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { Class = "form-horizontal" }))
+{
+  @Html.ValidationSummary(true, "Please correct the issues below and click \"Save\" again", new { Class = "alert alert-danger" })
+
+  <div class="form-group">
+    @Html.LabelFor(model => model.Name, new { Class = "col-md-2" })
+    <div class="col-md-4">@Html.TextBoxFor(model => model.Name, new { Class = "form-control" })</div>
+    <div class="col-md-6 val">@Html.ValidationMessageFor(model => model.Name)</div>
+  </div>
+  <div class="form-group">
+    @Html.LabelFor(model => model.DfeCode, new { Class = "col-md-2" })
+    <div class="col-md-4">@Html.TextBoxFor(model => model.DfeCode, new { Class = "form-control" })</div>
+    <div class="col-md-6 val">@Html.ValidationMessageFor(model => model.DfeCode)</div>
+  </div>
+  <div class="form-group">
+    @Html.LabelFor(model => model.PostCode, new { Class = "col-md-2" })
+    <div class="col-md-4">@Html.TextBoxFor(model => model.PostCode, new { Class = "form-control" })</div>
+    <div class="col-md-6 val">@Html.ValidationMessageFor(model => model.PostCode)</div>
+  </div>
+  <div class="form-group">
+    @Html.LabelFor(model => model.Licenced, new { Class = "col-md-2" })
+    <div class="col-md-4">@Html.CheckBoxFor(model => model.Licenced)</div>
+    <div class="col-md-6 val">@Html.ValidationMessageFor(model => model.Licenced)</div>
+  </div>
+
+  <div class="buttons">
+    <button class="btn btn-primary">Save</button>
+    @Html.ActionLink("Cancel", "Index", null, new { Class = "btn btn-default" })
+  </div>
+}

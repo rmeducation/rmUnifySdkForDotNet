@@ -1,0 +1,42 @@
+﻿@model IEnumerable<RM.Unify.Sdk.SampleApp2.Models.School>
+<h2>
+  Schools
+</h2>
+@if (ViewBag.Message != null)
+{
+  <div class="alert alert-success">@ViewBag.Message</div>
+}
+<div class="row">
+  <div class="col-md-2">
+    @Html.ActionLink("New School", "Create")
+  </div>
+</div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>
+        @Html.DisplayNameFor(model => model.Name)
+      </th>
+      <th>
+        @Html.DisplayNameFor(model => model.Licenced)
+      </th>
+      <th>
+      </th>
+    </tr>
+  </thead>
+  @foreach (var item in Model)
+  {
+    <tr>
+      <td>
+        @Html.DisplayFor(modelItem => item.Name)
+      </td>
+      <td>
+        @Html.CheckBoxFor(modelItem => item.Licenced, new { Class = "checkbox", disabled = "disabled" })
+      </td>
+      <td>
+        @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+        @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+      </td>
+    </tr>
+  }
+</table>

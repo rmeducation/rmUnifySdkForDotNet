@@ -1,0 +1,15 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School Blog</title>
+  @Styles.Render("~/Content/css")
+</head>
+<body>
+  @Html.Partial("_Toolbar")
+  <div class="maincontent container">
+    @RenderBody()
+    @Scripts.Render("~/bundles/scripts")
+  </div>
+</body>
+</html>
