@@ -33,9 +33,12 @@ namespace RM.Unify.Sdk.Client
         /// </summary>
         /// <param name="returnUrl">URL to redirect to on successful login (null for default URL)</param>
         /// <param name="refreshOnly">If true, login is only initiated if the current user was previously logged in via RM Unify</param>
-        public void Login(string returnUrl, bool refreshOnly)
+        /// <param name="endResponse">If true, the method should call Response.End() if redirecting to RM Unify for login.
+        /// True by default to maintain compatibility with earlier releases, but recommended value is false (because ending
+        /// the response can cause issues with setting cookies).</param>
+        public void Login(string returnUrl, bool refreshOnly, bool endResponse = true)
         {
-            _ssoHelper.Login(returnUrl, refreshOnly);
+            _ssoHelper.Login(returnUrl, refreshOnly, endResponse);
         }
 
         /// <summary>
@@ -45,9 +48,13 @@ namespace RM.Unify.Sdk.Client
         /// If the current user logged in via RM Unify, this method will redirect to the RM Unify single logout page.
         /// If the current user did not log in via RM Unify, this method will do nothing and return immediately.
         /// </summary>
-        public void Logout()
+        /// <param name="endResponse">If true, the method should call Response.End() if redirecting to RM Unify for logout.
+        /// True by default to maintain compatibility with earlier releases, but recommended value is false (because ending
+        /// the response can cause issues with clearing cookies).</param>
+        /// <returns>True if the user is an RM Unify user (and the browser has therefore been redirected to the RM Unify logout page)</returns>
+        public bool Logout(bool endResponse = true)
         {
-            _ssoHelper.Logout();
+            return _ssoHelper.Logout(endResponse);
         }
 
         /// <summary>
@@ -56,9 +63,12 @@ namespace RM.Unify.Sdk.Client
         /// this method.  This will be your RM Unify landing page, and you can initiate login by redirecting to this page
         /// (optionally add ?returnUrl=... when redirecting to this page to return to a specific URL after successful login).
         /// </summary>
-        public void ProcessSso()
+        /// <param name="endResponse">If true, the method should call Response.End() after processing redirecting or returning
+        /// a sign out tick.  True by default to maintain compatibility with earlier releases, but recommended value is false
+        /// (because ending the response can cause issues with setting or clearing cookies).</param>
+        public void ProcessSso(bool endResponse = true)
         {
-            _ssoHelper.ProcessSso();
+            _ssoHelper.ProcessSso(endResponse);
         }
 
         /// <summary>

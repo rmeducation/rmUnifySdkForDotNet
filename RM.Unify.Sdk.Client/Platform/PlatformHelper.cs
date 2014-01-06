@@ -18,11 +18,10 @@ namespace RM.Unify.Sdk.Client.Platform
             return HttpUtility.UrlEncode(s);
         }
 
-        internal static void RedirectBrowser(string url)
+        internal static void RedirectBrowser(string url, bool endResponse)
         {
             var response = HttpContext.Current.Response;
-            response.Redirect(url);
-            response.End();
+            response.Redirect(url, endResponse);
         }
 
         internal static void AddSessionCookie(string cookieName, string cookieValue)
@@ -50,7 +49,7 @@ namespace RM.Unify.Sdk.Client.Platform
             return HttpContext.Current.Request.Params[paramName];
         }
 
-        internal static void SendTickResponse()
+        internal static void SendTickResponse(bool endResponse)
         {
             var response = HttpContext.Current.Response;
             response.ClearContent();
@@ -58,8 +57,10 @@ namespace RM.Unify.Sdk.Client.Platform
             response.Cache.SetCacheability(HttpCacheability.NoCache);
             response.ContentType = "image/png"; ;
             response.BinaryWrite(_tickImage);
-            response.End();
-
+            if (endResponse)
+            {
+                response.End();
+            }
         }
     }
 }

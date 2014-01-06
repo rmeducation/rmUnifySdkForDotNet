@@ -35,33 +35,35 @@ namespace RM.Unify.Sdk.Client.SsoImpl
             _callbackApi = callbackApi;
         }
 
-        internal void Login(string returnUrl, bool refreshOnly)
+        internal void Login(string returnUrl, bool refreshOnly, bool endResponse)
         {
             if (!refreshOnly || IsRmUnifyUser())
             {
-                InitiateSignIn(returnUrl);
+                InitiateSignIn(returnUrl, endResponse);
             }
         }
 
-        internal void Logout()
+        internal bool Logout(bool endResponse)
         {
             if (IsRmUnifyUser())
             {
                 PlatformHelper.DeleteCookie("_rmunify_user");
-                PlatformHelper.RedirectBrowser(SsoConfig.IssueUrl + "?wa=wsignout1.0&wreply=" + PlatformHelper.UrlEncode(_callbackApi.Realm) + "&" + _LibVersionParam);
+                PlatformHelper.RedirectBrowser(SsoConfig.IssueUrl + "?wa=wsignout1.0&wreply=" + PlatformHelper.UrlEncode(_callbackApi.Realm) + "&" + _LibVersionParam, endResponse);
+                return true;
             }
+            return false;
         }
 
-        internal void ProcessSso()
+        internal void ProcessSso(bool endResponse)
         {
             try
             {
                 if (!ProcessSignIn())
                 {
-                    if (!ProcessSignOut())
+                    if (!ProcessSignOut(endResponse))
                     {
                         string returnUrl = PlatformHelper.GetParam("returnUrl");
-                        InitiateSignIn(returnUrl);
+                        InitiateSignIn(returnUrl, endResponse);
                     }
                 }
             }
@@ -72,7 +74,7 @@ namespace RM.Unify.Sdk.Client.SsoImpl
                     var errorUrl = SsoConfig.GetErrorUrl(_callbackApi.Realm, ex, _LibVersionParam);
                     if (!string.IsNullOrEmpty(errorUrl))
                     {
-                        PlatformHelper.RedirectBrowser(errorUrl);
+                        PlatformHelper.RedirectBrowser(errorUrl, true);
                         return;
                     }
                 }
@@ -167,20 +169,20 @@ namespace RM.Unify.Sdk.Client.SsoImpl
             return false;
         }
 
-        internal bool ProcessSignOut()
+        internal bool ProcessSignOut(bool endResponse)
         {
             if (PlatformHelper.GetParam("wa") == "wsignoutcleanup1.0")
             {
                 _callbackApi.DoLogout();
                 PlatformHelper.DeleteCookie("_rmunify_user");
-                PlatformHelper.SendTickResponse();
+                PlatformHelper.SendTickResponse(endResponse);
 
                 return true;
             }
             return false;
         }
 
-        internal void InitiateSignIn(string returnUrl)
+        internal void InitiateSignIn(string returnUrl, bool endResponse)
         {
             string url = SsoConfig.IssueUrl + "?wa=wsignin1.0&wtrealm=" + PlatformHelper.UrlEncode(_callbackApi.Realm);
             if (returnUrl != null)
@@ -188,7 +190,7 @@ namespace RM.Unify.Sdk.Client.SsoImpl
                 url += "&wctx=" + PlatformHelper.UrlEncode(returnUrl);
             }
             url +=  "&" + _LibVersionParam;
-            PlatformHelper.RedirectBrowser(url);
+            PlatformHelper.RedirectBrowser(url, endResponse);
         }
     }
 }
