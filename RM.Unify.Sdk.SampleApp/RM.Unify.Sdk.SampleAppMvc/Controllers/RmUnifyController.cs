@@ -18,10 +18,10 @@ namespace RM.Unify.Sdk.SampleAppMvc.Controllers
         public ActionResult Index()
         {
             RM.Unify.Sdk.Client.RmUnifyClientApi client = new RM.Unify.Sdk.Client.RmUnifyClientApi(new RmUnify.CallbackApiImplementation());
-            client.ProcessSso();
+            client.ProcessSso(false);
 
             // Should never get here
-            return this.Content("Should never see this");
+            return new EmptyResult();
         }
 
     }

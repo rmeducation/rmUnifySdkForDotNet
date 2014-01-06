@@ -73,7 +73,10 @@ namespace RM.Unify.Sdk.SampleApp2.Controllers
             FormsAuthentication.SignOut();
             // RMUNIFY
             RM.Unify.Sdk.Client.RmUnifyClientApi client = new RM.Unify.Sdk.Client.RmUnifyClientApi(new Helpers.RmUnifyWithAccountLinking());
-            client.Logout();
+            if (client.Logout(false))
+            {
+                return new EmptyResult();
+            }
             // END RMUNIFY
             return RedirectToAction("Index", "Blog");
         }

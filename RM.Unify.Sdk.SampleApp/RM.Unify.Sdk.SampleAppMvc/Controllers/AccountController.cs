@@ -56,7 +56,10 @@ namespace RM.Unify.Sdk.SampleAppMvc.Controllers
             WebSecurity.Logout();
 
             RM.Unify.Sdk.Client.RmUnifyClientApi client = new RM.Unify.Sdk.Client.RmUnifyClientApi(new RmUnify.CallbackApiImplementation());
-            client.Logout();
+            if (client.Logout(false))
+            {
+                return new EmptyResult();
+            }
 
             return RedirectToAction("Index", "Home");
         }

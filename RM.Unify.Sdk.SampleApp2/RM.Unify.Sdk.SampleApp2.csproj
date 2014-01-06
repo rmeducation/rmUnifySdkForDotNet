@@ -42,8 +42,8 @@
       <HintPath>..\packages\EntityFramework.5.0.0\lib\net40\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="RM.Unify.Sdk.Client">
-      <HintPath>packages\RM.Unify.Sdk.2.1.0\lib\net20\RM.Unify.Sdk.Client.dll</HintPath>
+    <Reference Include="RM.Unify.Sdk.Client, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\RM.Unify.Sdk.2.1.1\lib\net20\RM.Unify.Sdk.Client.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -176,7 +176,9 @@
     <Folder Include="App_Data\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="packages.config" />
+    <Content Include="packages.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\_ViewStart.cshtml" />

@@ -15,9 +15,9 @@ namespace RM.Unify.Sdk.SampleApp2.Controllers
         public ActionResult Index()
         {
             RM.Unify.Sdk.Client.RmUnifyClientApi client = new RM.Unify.Sdk.Client.RmUnifyClientApi(new Helpers.RmUnifyWithAccountLinking());
-            client.ProcessSso();
+            client.ProcessSso(false);
 
-            return this.Content("Should never see this");
+            return new EmptyResult();
         }
 
         [Authorize(Roles = "admin")]
