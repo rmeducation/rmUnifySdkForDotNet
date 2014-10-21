@@ -191,5 +191,45 @@ namespace RM.Unify.Sdk.Client.SsoImpl
                 return string.IsNullOrEmpty(val) ? null : val;
             }
         }
+
+        public override string MisId
+        {
+            get
+            {
+                string val;
+                RawSsoAttributes.TryGetValue("http://schemas.rm.com/identity/claims/misidentifier", out val);
+                return string.IsNullOrEmpty(val) ? null : val;
+            }
+        }
+
+        public override string RegGroup
+        {
+            get
+            {
+                string val;
+                RawSsoAttributes.TryGetValue("http://schemas.rm.com/identity/claims/registrationgroup", out val);
+                return string.IsNullOrEmpty(val) ? null : val;
+            }
+        }
+
+        public override string UPN
+        {
+            get
+            {
+                string val;
+                RawSsoAttributes.TryGetValue("http://schemas.rm.com/identity/claims/uniquepupilnumber", out val);
+                return string.IsNullOrEmpty(val) ? null : val;
+            }
+        }
+
+        public override string SCN
+        {
+            get
+            {
+                string val;
+                RawSsoAttributes.TryGetValue("http://schemas.rm.com/identity/claims/scottishcandidatenumber", out val);
+                return string.IsNullOrEmpty(val) ? null : val;
+            }
+        }
     }
 }

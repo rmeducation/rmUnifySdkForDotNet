@@ -40,6 +40,8 @@ namespace RM.Unify.Sdk.Client
 
         /// <summary>
         /// Unique identifer for this user (can persist when users move organization if the organization's share an AD).
+        /// This identifier will typically persist for users in the Scottish "Glow" implementation of RM Unify when they
+        /// move between schools.
         /// This will be eiether the IdentityGuid (if requested) or PersistentId.
         /// </summary>
         public abstract string PersonId
@@ -127,6 +129,62 @@ namespace RM.Unify.Sdk.Client
         /// has been matched to a pre-existing user.
         /// </summary>
         public abstract string AppUserId
+        {
+            get;
+        }
+
+        /// <summary>
+        /// The MIS ID of the current user.
+        /// This is an internal identifier supplied by the MIS to RM Unify.  If your app connects to the school MIS, this
+        /// can be used to link an RM Unify account to an MIS record.
+        /// Identifiers will overlap for students and staff within the same organisation and for users in different
+        /// organisations; when matching to MIS data, you will need to also use the organization code and the user role
+        /// to match to the correct MIS record.
+        /// This attribute is only available if the school has linked RM Unify to their MIS, and if the individual user
+        /// has been matched to an MIS record in RM Unify.  It is available for all users with MIS records in state-run
+        /// schools using the Scottish "Glow" implementation of RM Unify.
+        /// See http://dev.rmunify.com/reference/understanding-rm-unify/mis-data-from-rm-unify.aspx for more information.
+        /// </summary>
+        public abstract string MisId
+        {
+            get;
+        }
+
+        /// <summary>
+        /// The registration group of the current user.
+        /// This is the name the school gives to the registration group (or class) that the student is in.
+        /// Each student can only be in one registration group.
+        /// This attribute is only available if the school has linked RM Unify to their MIS, and if the individual user
+        /// has been matched to an MIS record in RM Unify.  It is available for all students in state-run schools using
+        /// the Scottish "Glow" implementation of RM Unify.
+        /// </summary>
+        public abstract string RegGroup
+        {
+            get;
+        }
+
+        /// <summary>
+        /// The unique pupil number for the current user.
+        /// UPN only applies to students in England and Wales.  This is a government-issued identifier which should
+        /// not change even when the student moves school.
+        /// This attribute is only available if the school has linked RM Unify to their MIS, and if the individual user
+        /// has been matched to an MIS record in RM Unify.
+        /// </summary>
+        public abstract string UPN
+        {
+            get;
+        }
+
+        /// <summary>
+        /// The Scottish candidate number for the current user.
+        /// SCN only applies to students in Scotland.  This is a government-issued identifier which should not change
+        /// even when the student moves school.
+        /// SCN is available for all students in state-run schools using the Scottish "Glow" implementation of RM Unify.
+        /// In the case of independent Scottish schools or Scottish schools using RM Unify outside "Glow", it is only
+        /// available if the school has linked RM Unify to their MIS, and if the individual user has been matched to an
+        /// MIS record in RM Unify.
+        /// </summary>
+        public abstract string SCN
         {
             get;
         }
