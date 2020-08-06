@@ -20,8 +20,7 @@ namespace RmUnifySample.RmUnify
         }
         public override string Realm
         {
-            // get { return "https://rmunifysampleapp.rm.com/realm"; }
-            get { return "https://rmunifydemo.whole.school/realm"; }
+           get { return "https://rmunifysampleapp.rm.com/realm"; }
         }
 
         public override void CreateOrUpdateOrganization(RmUnifyOrganization organization, Source source)
